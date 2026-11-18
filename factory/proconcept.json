@@ -1,0 +1,15 @@
+{
+	"name": "proconcept",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "b13571d4-2e91-4096-b67e-143e8d5fbae8",
+		"tenantId": "015e9ff8-e604-4f85-9f2d-f24039dd2b0c"
+	}
+}
