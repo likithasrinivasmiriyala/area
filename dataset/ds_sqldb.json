@@ -5,49 +5,71 @@
 			"referenceName": "ls_sqldb",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"table_name": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [
 			{
-				"name": "order_id",
+				"name": "Branch_ID",
+				"type": "varchar"
+			},
+			{
+				"name": "Dealer_ID",
+				"type": "varchar"
+			},
+			{
+				"name": "Model_ID",
+				"type": "varchar"
+			},
+			{
+				"name": "Revenue",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "Units_Sold",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "Date_ID",
+				"type": "varchar"
+			},
+			{
+				"name": "Day",
 				"type": "int",
 				"precision": 10
 			},
 			{
-				"name": "customer_name",
-				"type": "varchar"
-			},
-			{
-				"name": "product_name",
-				"type": "varchar"
-			},
-			{
-				"name": "quantity",
+				"name": "Month",
 				"type": "int",
 				"precision": 10
 			},
 			{
-				"name": "price",
-				"type": "decimal",
-				"precision": 10,
-				"scale": 2
+				"name": "Year",
+				"type": "int",
+				"precision": 10
 			},
 			{
-				"name": "order_date",
-				"type": "datetime",
-				"precision": 23,
-				"scale": 3
+				"name": "BranchName",
+				"type": "varchar"
 			},
 			{
-				"name": "last_updated",
-				"type": "datetime",
-				"precision": 23,
-				"scale": 3
+				"name": "DealerName",
+				"type": "varchar"
+			},
+			{
+				"name": "Product_Name",
+				"type": "varchar"
 			}
 		],
 		"typeProperties": {
 			"schema": "dbo",
-			"table": "orrder"
+			"table": "orders_car"
 		}
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"

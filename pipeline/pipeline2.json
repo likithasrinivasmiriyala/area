@@ -3,27 +3,201 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Execute Pipeline1",
-				"type": "ExecutePipeline",
+				"name": "Lookup1",
+				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
 					"secureInput": false
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"pipeline": {
-						"referenceName": "pipeline1",
-						"type": "PipelineReference"
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select * from water_table",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"table": "orrder"
+					"dataset": {
+						"referenceName": "ds_sqldb",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": "water_table"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Lookup2",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select max(Date_ID) as max_date from orders_car",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_sqldb",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": "orders_car"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Lookup2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select * from orders_car where Date_ID > '@{activity('Lookup1').output.value[0].last_load}' AND Date_ID <= '@{activity('Lookup2').output.value[0].max_date}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_sqldb",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": "orders_car"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_parquet",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Stored procedure1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[watermark]",
+					"storedProcedureParameters": {
+						"lastload": {
+							"value": {
+								"value": "@activity('Lookup2').output.value[0].max_date",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_sqldb",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Notebook1",
+				"type": "DatabricksNotebook",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "Stored procedure1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Users/monikamanasa456@gmail.com/project/tranformations"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_notebook",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],
 		"annotations": [],
-		"lastPublishTime": "2026-11-18T06:57:45Z"
+		"lastPublishTime": "2026-10-28T11:09:03Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }

@@ -1,0 +1,16 @@
+{
+	"name": "adfprohello",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true,
+			"isExplicitlySet": false
+		}
+	},
+	"location": "uksouth",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "c6accb74-17bc-47c0-bcd9-904e1c10d56b",
+		"tenantId": "015e9ff8-e604-4f85-9f2d-f24039dd2b0c"
+	}
+}
